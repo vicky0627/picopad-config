@@ -18,8 +18,8 @@
             </div>
           </div>
           <a
-            href="/Picopad-v1-Setup.zip"
-            download
+            href="https://github.com/vicky0627/picopad-config/releases/latest/download/Picopad-v1-Setup.exe"
+            target="_blank"
             class="btn btn-sm btn-secondary text-white shadow-lg shadow-secondary/30"
           >
             <i class="mdi mdi-download mr-1"></i>

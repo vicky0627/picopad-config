@@ -2,7 +2,8 @@
   <div
     v-if="visible"
     ref="keyElem"
-    class="keycap"
+    class="keycap transition-all group"
+    @click.stop="handleKeyClick"
     style="user-select: none"
     :data-index="keyIndex"
     :style="{
@@ -21,7 +22,7 @@
   >
     <div
       v-if="keyData.w2 || keyData.h2"
-      class="keyborder-blocker"
+      class="keyborder-blocker bg-base-200"
       :style="{
         left: '1px',
         top: '4px',
@@ -30,7 +31,7 @@
       }"
     ></div>
     <div
-      class="keyborder"
+      class="keyborder bg-base-300"
       :style="{
         width: keyWidth + 'px',
         height: keyHeight + 'px',
@@ -39,7 +40,7 @@
     ></div>
     <div
       v-if="keyData.w2 || keyData.h2"
-      class="keyborder"
+      class="keyborder bg-base-300"
       :class="{ selected: mainSelected }"
       :style="{
         left: keyData.x2 * baseKeyWidth - 1 + 'px',
@@ -49,7 +50,7 @@
     ></div>
     <div
       v-if="keyData.w2 || keyData.h2"
-      class="keytop"
+      class="keytop bg-base-200 group-hover:!bg-base-100"
       :style="{
         height: keyTopHeight2 + 'px',
         left: keyData.x2 * (baseKeyWidth + keyGap) + 1 + 'px',
@@ -62,7 +63,7 @@
     <!--    ></div>-->
     <div
       v-else
-      class="keytop"
+      class="keytop bg-base-200 group-hover:!bg-base-100"
       :style="{
         top: !mainLabel || isSimple ? '4px' : '14px',
         height: keyTopHeight + 'px',
@@ -72,10 +73,10 @@
     <div v-if="!isSimple && mode !== 'layout'" class="keylabel-action">
       <div
         v-if="typeof keyData.encoderIndex === 'number' && mode !== 'layout'"
-        class="encoder-labels"
+        class="encoder-labels flex w-full justify-between"
       >
-        <div v-html="encoderActionA"></div>
-        <div v-html="encoderActionB"></div>
+        <div class="rounded px-1.5" v-html="encoderActionA"></div>
+        <div class="rounded px-1.5" v-html="encoderActionB"></div>
       </div>
       <span v-else>
         {{ mainLabel.action }}
@@ -92,7 +93,7 @@
       <!--          {{label}}-->
       <!--        </div>-->
       <!--      </div>-->
-      <div v-if="mainLabel" class="keylabel keylabel-center">
+      <div v-if="mainLabel" class="keylabel keylabel-center gap-1 flex items-center justify-center text-center">
         <span
           v-if="isSimple || typeof keyData.encoderIndex === 'number'"
           class="keylabel-main"
@@ -360,12 +361,29 @@ watch(mainLabel, async () => {
 onMounted(() => {
   fixLabelWidth()
 })
+
+const handleKeyClick = (e: MouseEvent) => {
+  if (props.mode === 'static') return
+  
+  console.log('Key clicked:', props.keyIndex)
+  const id = props.keyIndex
+  
+  if (e.shiftKey || e.ctrlKey || e.metaKey) {
+    if (selectedKeys.value.has(id)) {
+      selectedKeys.value.delete(id)
+    } else {
+      selectedKeys.value.add(id)
+    }
+  } else {
+    selectedKeys.value.clear()
+    selectedKeys.value.add(id)
+  }
+}
 </script>
 
 <style lang="scss" scoped>
 .keyborder {
   // outer key outline and background
-  background: #171717;
   background-image: url('../assets/keycaptophighlight.png');
   background-repeat: repeat-x;
   position: absolute;
@@ -388,15 +406,12 @@ onMounted(() => {
   position: absolute;
   top: 2px;
   z-index: 10;
-  @apply flex w-full justify-between;
   & > div {
     //background: #646464;
     line-height: 15px;
-    @apply rounded px-1.5;
   }
 }
 .keyborder-blocker {
-  background: #3e3e3e;
   position: absolute;
   width: 52px;
   height: 52px;
@@ -411,7 +426,6 @@ onMounted(() => {
   left: 1px;
   top: 4px;
   right: 1px;
-  background: #3e3e3e;
   cursor: pointer;
   border-radius: 12px;
   z-index: 6;
@@ -421,6 +435,9 @@ onMounted(() => {
   .selected.encoder & {
     border-bottom: 1px solid white;
   }
+  
+  /* Smooth movement */
+  transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.1s ease;
 }
 .keylabels {
   position: absolute;
@@ -432,31 +449,18 @@ onMounted(() => {
   line-height: 1rem;
   //z-index: 3;
   z-index: 7;
-  .selected & {
-  }
+  transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .keylabel {
   position: absolute;
   width: 100%;
   height: 100%; //calc(48px - 5px);
-  @apply gap-1;
-
-  &-0 {
-    left: 8px;
-    top: 2px;
-    @apply flex items-start justify-start text-center;
-  }
-  &-3 {
-    right: 8px;
-    bottom: 2px;
-    @apply flex items-end justify-end text-center;
-  }
+  
   &-center {
-    @apply flex items-center justify-center text-center;
     flex-wrap: wrap;
   }
   .arg-top {
-    @apply text-center;
+    text-align: center;
     position: absolute;
     top: 0px;
     left: 6px;
@@ -464,7 +468,11 @@ onMounted(() => {
     font-size: 10px;
   }
   .arg-bottom {
-    @apply flex items-center justify-center rounded text-center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.25rem;
+    text-align: center;
     position: absolute;
     //border: 1px solid #666;
     left: 6px;
@@ -480,12 +488,20 @@ onMounted(() => {
 }
 .keycap {
   position: absolute;
-  @apply transition-all;
   .dragging & {
     transition: all 0.08s ease-out;
   }
   &.is-trns {
     opacity: 0.3;
+  }
+  
+  /* 3D Press Interaction */
+  &:hover .keytop {
+    transform: translateY(2px);
+  }
+  &:hover .keylabel-action,
+  &:hover .keylabels {
+      transform: translateY(2px);
   }
 }
 //.keycap {
@@ -537,5 +553,6 @@ onMounted(() => {
   position: absolute;
   z-index: 10;
   text-align: center;
+  transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
 }
 </style>

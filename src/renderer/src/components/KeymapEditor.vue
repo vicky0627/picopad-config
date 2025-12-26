@@ -1,7 +1,7 @@
 <template>
   <div class="relative">
     <!--    <h2 class="mb-2 inline-block absolute top-6" style="transform: rotate(-90deg);  left: -15px">Layers</h2>-->
-    <div class="mb-2 flex gap-2">
+    <div class="mb-6 flex gap-2">
       <button class="btn btn-sm" @click="addLayer"><i class="mdi mdi-plus"></i>add Layer</button>
       <button class="btn btn-sm" :disabled="keyboardStore.keymap.length === 1" @click="removeLayer">
         <i class="mdi mdi-trash-can"></i>remove Layer
@@ -35,7 +35,7 @@
     </div>
   </div>
 
-  <div class="my-12">
+  <div class="my-10">
     <keyboard-layout
       :key-layout="keyboardStore.keys"
       :keymap="keyboardStore.keymap"

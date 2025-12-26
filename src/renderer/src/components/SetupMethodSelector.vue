@@ -82,7 +82,7 @@
     >
       <h3 class="mb-3 text-xl font-semibold">Automatic Detection (Experimental)</h3>
       <p class="">
-        Let Pog automatically detect your keyboard's configuration by pressing each key. We'll flash
+        Let Picopad automatically detect your keyboard's configuration by pressing each key. We'll flash
         a special firmware and guide you through the process.
       </p>
     </div>
@@ -119,24 +119,23 @@ async function scanPorts() {
     }, {} as Record<string, SerialPort[]>)
     console.log('portsBySerial', portsBySerial)
     // Sort ports within each group and take only the first port (lower number)
-    ports.value = Object.entries(portsBySerial).map(([serialNumber, ports]) => {
-      ports.sort((a, b) => a.port.localeCompare(b.port))
+    ports.value = (Object.entries(portsBySerial) as [string, SerialPort[]][]).map(([serialNumber, portList]) => {
+      portList.sort((a, b) => a.port.localeCompare(b.port))
       // Store both ports in the keyboard store
-      if (ports.length >= 2) {
+      if (portList.length >= 2) {
         const keyboard = {
           serialNumber,
-          serialPortA: ports[0].port,
-          serialPortB: ports[1].port,
-          manufacturer: ports[0].manufacturer,
-          port: ports[0].port, // Keep the first port as the main port for backwards compatibility
-          hasDataSerial: ports.length >= 2
+          serialPortA: portList[0].port,
+          serialPortB: portList[1].port,
+          manufacturer: portList[0].manufacturer,
+          port: portList[0].port, // Keep the first port as the main port for backwards compatibility
+          hasDataSerial: portList.length >= 2
         }
-        return keyboard
+        return keyboard as unknown as SerialPort
       }
-      return ports[0]
+      return portList[0]
       // return false
     })
-    //   .filter((port) => port !== false)
     console.log('ports', ports.value)
 
     // Auto-select recommended port if available

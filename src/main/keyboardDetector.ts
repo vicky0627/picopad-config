@@ -1,5 +1,4 @@
-import { SerialPort } from 'serialport'
-import { ReadlineParser } from '@serialport/parser-readline'
+import { SerialPort, ReadlineParser } from './mocks'
 import { BrowserWindow, ipcMain } from 'electron'
 import { flashFirmware } from './kmkUpdater'
 import path from 'path'
@@ -26,11 +25,11 @@ export class KeyboardDetector {
   async startDetection(window: BrowserWindow) {
     try {
       // Flash detection firmware
-    //   const detectionFirmwarePath = path.join(__dirname, '../firmware/detection')
-    //   await flashFirmware(detectionFirmwarePath)
+      //   const detectionFirmwarePath = path.join(__dirname, '../firmware/detection')
+      //   await flashFirmware(detectionFirmwarePath)
 
       // Wait for the board to restart
-    //   await new Promise(resolve => setTimeout(resolve, 2000))
+      //   await new Promise(resolve => setTimeout(resolve, 2000))
 
       // Find the data port (second port)
       const serialNumber = currentKeyboard.serialNumber
@@ -63,10 +62,10 @@ export class KeyboardDetector {
         baudRate: 115200
       })
 
-      this.parser = this.port.pipe(new ReadlineParser())
+      this.parser = this.port!.pipe(new ReadlineParser())
 
       // Handle incoming data
-      this.parser.on('data', (data: string) => {
+      this.parser?.on('data', (data: string) => {
         this.handleDetectionData(data, window)
       })
 

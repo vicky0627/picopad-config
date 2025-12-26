@@ -15,7 +15,7 @@ type KeyActions = {
 }[]
 
 export const keyboardHistory = useStorage<any[]>('keyboardHistory', [])
-export const addToHistory = (keyboard) => {
+export const addToHistory = (keyboard: any) => {
   console.log('saving keyboard to history', keyboard)
   // to get rid of reactivity and proxys while deepcloning // does not work with structured clone
   const keyboardData = {
@@ -43,7 +43,14 @@ export const selectedKeys = ref<Set<number>>(new Set())
 export const selectedLayer = ref(0)
 
 type EncoderLayer = EncoderActions[]
-type EncoderActions = [string, string]
+type EncoderActions = [string, string, string | undefined]
+export type Profile = {
+  id: string
+  name: string
+  keymap: (string | undefined)[][]
+  layers: { name: string; color: string | undefined }[]
+  encoderKeymap: EncoderLayer[]
+}
 
 export type BaseKeyInfo = {
   x: number
@@ -210,7 +217,7 @@ export class Key {
     // }
   }
 
-  setOnKeymap(keyCode) {
+  setOnKeymap(keyCode: string) {
     const keyIndex = this.getKeymapIndex()
     console.log('index', keyIndex, keyCode)
     if (typeof keyIndex !== 'number') return
@@ -254,10 +261,11 @@ export class Key {
   }
 
   getEncoderLabel() {
-    if (typeof this.encoderIndex !== 'number') return { a: '', b: '' }
+    if (typeof this.encoderIndex !== 'number') return { a: '', b: '', s: '' }
     return {
       a: this.keyboard.encoderKeymap[0][this.encoderIndex][0],
-      b: this.keyboard.encoderKeymap[0][this.encoderIndex][1]
+      b: this.keyboard.encoderKeymap[0][this.encoderIndex][1],
+      s: this.keyboard.encoderKeymap[0][this.encoderIndex][2]
     }
   }
 }
@@ -349,6 +357,10 @@ export class Keyboard {
   keymap: (string | undefined)[][] = [[]]
   layers: { name: string; color: string | undefined }[] = []
 
+  // profiles
+  profiles: Profile[] = []
+  activeProfileId?: string = undefined
+
   kbFeatures = [
     'basic',
     'serial',
@@ -376,7 +388,7 @@ export class Keyboard {
     return this.keys.map((key) => key.serialize())
   }
 
-  addKey(key) {
+  addKey(key: any) {
     this.keys.push(new Key({ ...key, keyboard: this }))
   }
 
@@ -398,7 +410,7 @@ export class Keyboard {
     })
   }
 
-  hasFile(filename) {
+  hasFile(filename: string) {
     return this.driveContents.includes(filename)
   }
 
@@ -439,7 +451,7 @@ export class Keyboard {
   }
 
   // get keymap index for matrix pos of a key
-  getKeymapIndexForKey({ key }) {
+  getKeymapIndexForKey({ key }: { key: any }) {
     const keyIndex = matrixPositionToIndex({
       pos: key.matrix,
       matrixWidth: this.getMatrixWidth()
@@ -447,7 +459,7 @@ export class Keyboard {
     return keyIndex
   }
 
-  getActionForKey({ key, layer }) {
+  getActionForKey({ key, layer }: { key: any; layer: number }) {
     if (!this.keymap[layer]) return 'No layer'
     const keyCode = this.keymap[layer][key.getKeymapIndex()]
     // resolve readable character
@@ -520,6 +532,24 @@ export class Keyboard {
       if (configContents.rgbOptions) this.rgbOptions = configContents.rgbOptions
 
       if (configContents.kbFeatures) this.kbFeatures = configContents.kbFeatures
+      
+      // profiles
+      if (configContents.profiles) {
+        this.profiles = configContents.profiles
+        this.activeProfileId = configContents.activeProfileId
+      } else {
+        // Migration: If no profiles exist but we have content, create a default profile
+        // This ensures backward compatibility while enabling new features
+        const defaultProfile: Profile = {
+          id: ulid(),
+          name: 'Default',
+          keymap: this.keymap,
+          layers: this.layers,
+          encoderKeymap: this.encoderKeymap
+        }
+        this.profiles = [defaultProfile]
+        this.activeProfileId = defaultProfile.id
+      }
     }
   }
 
@@ -568,13 +598,84 @@ export class Keyboard {
     this.splitUsePio = true
     this.splitFlip = false
     this.splitUartFlip = false
-    // Reset serial ports
-    this.serialPortA = undefined
-    this.serialPortB = undefined
     this.serialNumber = ''
+    this.profiles = []
+    this.activeProfileId = undefined
+  }
+
+  // Profile Management
+  addProfile(name: string) {
+    const newProfile: Profile = {
+      id: ulid(),
+      name,
+      keymap: JSON.parse(JSON.stringify(this.keymap)), // Clone current keymap or empty? Let's clone current as a starting point
+      layers: JSON.parse(JSON.stringify(this.layers)),
+      encoderKeymap: JSON.parse(JSON.stringify(this.encoderKeymap))
+    }
+    this.profiles.push(newProfile)
+    return newProfile
+  }
+
+  removeProfile(id: string) {
+    if (this.profiles.length <= 1) return // Cannot delete last profile
+    this.profiles = this.profiles.filter(p => p.id !== id)
+    if (this.activeProfileId === id) {
+      this.activateProfile(this.profiles[0].id)
+    }
+  }
+
+  activateProfile(id: string) {
+    const profile = this.profiles.find(p => p.id === id)
+    if (!profile) return
+    
+    // Save current state to old profile before switching? 
+    // Usually explicit save is better, but 'switching profiles' might imply saving the previous one.
+    // However, the task says 'Switching profiles must NOT auto-flash firmware'.
+    // It doesn't prohibit updating the in-memory store.
+    if (this.activeProfileId) {
+      this.updateProfile(this.activeProfileId)
+    }
+
+    this.activeProfileId = id
+    this.keymap = JSON.parse(JSON.stringify(profile.keymap))
+    this.layers = JSON.parse(JSON.stringify(profile.layers))
+    this.encoderKeymap = JSON.parse(JSON.stringify(profile.encoderKeymap))
+    
+    // Trigger reactivity if needed (Vue refs should handle it if this.keymap is replaced)
+  }
+  
+  updateProfile(id: string) {
+    const index = this.profiles.findIndex(p => p.id === id)
+    if (index === -1) return
+    this.profiles[index] = {
+      ...this.profiles[index],
+      keymap: JSON.parse(JSON.stringify(this.keymap)),
+      layers: JSON.parse(JSON.stringify(this.layers)),
+      encoderKeymap: JSON.parse(JSON.stringify(this.encoderKeymap))
+    }
+  }
+
+  renameProfile(id: string, newName: string) {
+    const profile = this.profiles.find(p => p.id === id)
+    if (profile) profile.name = newName
+  }
+
+  duplicateProfile(id: string) {
+    const profile = this.profiles.find(p => p.id === id)
+    if (!profile) return
+    const newProfile = {
+      ...JSON.parse(JSON.stringify(profile)),
+      id: ulid(),
+      name: `${profile.name} Copy`
+    }
+    this.profiles.push(newProfile)
   }
 
   serialize() {
+    // Ensure active profile is up to date before serializing
+    if (this.activeProfileId) {
+      this.updateProfile(this.activeProfileId)
+    }
     return {
       id: this.id,
       name: this.name,
@@ -621,6 +722,9 @@ export class Keyboard {
       rgbOptions: this.rgbOptions,
 
       kbFeatures: this.kbFeatures,
+
+      profiles: this.profiles,
+      activeProfileId: this.activeProfileId,
 
       flashingMode: this.flashingMode,
       lastEdited: dayjs().format('YYYY-MM-DD HH:mm')

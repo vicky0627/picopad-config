@@ -1,5 +1,6 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import LaunchScreen from '../screens/LaunchScreen.vue'
+import KeyboardTester from '../screens/KeyboardTester.vue'
 import AddKeyboard from '../screens/AddKeyboard.vue'
 import KeyboardConfigurator from '../screens/KeyboardConfigurator.vue'
 import KmkInstaller from '../components/KmkInstaller.vue'
@@ -22,6 +23,8 @@ import SetupMethodSelector from '../components/SetupMethodSelector.vue'
 import AutomaticSetup from '../components/AutomaticSetup.vue'
 // import KeyboardSetup from '../screens/KeyboardSetup.vue'
 import InstallPogFirmware from '../components/installPogFirmware.vue'
+
+import UserManual from '../components/UserManual.vue'
 
 const routes = [
   {
@@ -61,7 +64,7 @@ const routes = [
       },
       {
         path: 'mapping',
-        name: 'Automatic Setup',
+        name: 'Automatic Mapping',
         component: AutomaticSetup
       },
       {
@@ -135,8 +138,18 @@ const routes = [
         path: 'rgb',
         name: 'RGB',
         component: RgbSetup
+      },
+      {
+        path: 'manual',
+        name: 'User Manual',
+        component: UserManual
       }
     ]
+  },
+  {
+    path: '/tester',
+    name: 'Keyboard Tester',
+    component: KeyboardTester
   }
 ]
 

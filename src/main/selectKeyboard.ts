@@ -2,7 +2,8 @@ import * as fs from 'fs-extra'
 import { currentKeyboard } from './store'
 import { dialog } from 'electron'
 import { connectedKeyboardPort, connectSerialKeyboard, serialBoards } from './index'
-import * as serialPort from 'serialport'
+import * as serialPort from './mocks'
+import { scanDrives } from './driveScanner'
 
 // invoked from frontend to select a drive or folder load the conig from
 export const handleSelectDrive = async () => {
@@ -90,4 +91,43 @@ export const checkForUSBKeyboards = async (keyboardPaths: string[]) => {
     }
   }
   return connectedKeyboards
+}
+
+export const listKeyboards = async () => {
+  const drives = await scanDrives()
+  const validKeyboards: any[] = []
+
+  for (const drive of drives) {
+    const drivePath = drive.mountpoints[0].path
+    // Check for pog.json
+    const pogConfigPath = `${drivePath}pog.json`
+    const codePath = `${drivePath}code.py`
+
+    let name = drive.mountpoints[0].label || 'Unknown Keyboard'
+    let id = drivePath
+
+    if (fs.existsSync(pogConfigPath)) {
+      try {
+        const config = JSON.parse(await fs.promises.readFile(pogConfigPath, 'utf8'))
+        if (config.name) name = config.name
+        if (config.id) id = config.id
+      } catch (e) {
+        console.error('Error reading pog.json on ' + drivePath, e)
+      }
+      validKeyboards.push({
+        id,
+        name,
+        path: drivePath,
+        isPog: true
+      })
+    } else if (fs.existsSync(codePath)) {
+      validKeyboards.push({
+        id: drivePath,
+        name: drive.mountpoints[0].label || 'CircuitPython Device',
+        path: drivePath,
+        isPog: false // Has code.py but no pog.json
+      })
+    }
+  }
+  return validKeyboards
 }

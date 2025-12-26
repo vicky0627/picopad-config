@@ -118,13 +118,13 @@ const sortedPorts = computed(() => {
     })
 })
 
-// Auto-connect to the first available port when ports are refreshed
-watch(sortedPorts, (newPorts) => {
-  if (!isConnected.value && !isConnecting.value && newPorts.length > 0) {
-    selectedPort.value = newPorts[0].port
-    connect()
-  }
-}, { immediate: true })
+// Auto-connect removed to prevent UI locking and allow user selection
+// watch(sortedPorts, (newPorts) => {
+//   if (!isConnected.value && !isConnecting.value && newPorts.length > 0) {
+//     selectedPort.value = newPorts[0].port
+//     connect()
+//   }
+// }, { immediate: true })
 
 const scrollTextarea = () => {
   nextTick(() => {

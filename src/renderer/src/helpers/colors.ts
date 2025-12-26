@@ -1,4 +1,4 @@
-export const hexToHSL = (hex): {hue: number, sat: number, val: number} => {
+export const hexToHSL = (hex: string): { hue: number; sat: number; val: number } => {
   const result: RegExpExecArray | null = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
   if (!result) return { hue: 0, sat: 0, val: 0 }
   let r = parseInt(result[1], 16)
@@ -41,7 +41,7 @@ export const hexToHSL = (hex): {hue: number, sat: number, val: number} => {
   }
 }
 
-export function hslToHex(h, s, l): string {
+export function hslToHex(h: number, s: number, l: number): string {
   s /= 255
   l /= 255
 
@@ -83,9 +83,9 @@ export function hslToHex(h, s, l): string {
   let b_str = Math.round((b + m) * 255).toString(16)
 
   // Prepend 0s, if necessary
-  if (r_str.length == 1) r_str = '0' + r
-  if (g_str.length == 1) g_str = '0' + g
-  if (b_str.length == 1) b_str = '0' + b
+  if (r_str.length == 1) r_str = '0' + r_str
+  if (g_str.length == 1) g_str = '0' + g_str
+  if (b_str.length == 1) b_str = '0' + b_str
 
   return '#' + r_str + g_str + b_str
 }

@@ -5,6 +5,13 @@ module.exports = {
   content: ['./index.html', './src/**/*.vue'],
   theme: {
     extend: {
+      borderRadius: {
+        DEFAULT: '0.5rem',
+        md: '0.8rem',
+        lg: '1rem',
+        xl: '1.5rem',
+        '2xl': '2rem',
+      },
       backgroundImage: (theme) => ({
         'multiselect-caret': `url("${svgToDataUri(
           `<svg viewBox="0 0 320 512" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M31.3 192h257.3c17.8 0 26.7 21.5 14.1 34.1L174.1 354.8c-7.8 7.8-20.5 7.8-28.3 0L17.2 226.1C4.6 213.5 13.5 192 31.3 192z"></path></svg>`
@@ -23,7 +30,7 @@ module.exports = {
   plugins: [require('daisyui')],
   daisyui: {
     // themes: false, // true: all themes | false: only light + dark | array: specific themes like this ["light", "dark", "cupcake"]
-    darkTheme: 'worange', // name of one of the included themes for dark mode
+    darkTheme: 'picopad', // name of one of the included themes for dark mode
     base: true, // applies background color and foreground color for root element by default
     styled: true, // include daisyUI colors and design decisions for all components
     utils: true, // adds responsive and modifier utility classes
@@ -32,21 +39,71 @@ module.exports = {
     logs: true, // Shows info about daisyU
     themes: [
       {
-        worange: {
+        picopad: {
           'color-scheme': 'dark',
-          'primary-content': '#131616',
-          secondary: '#6d3a9c',
-          accent: '#51a800',
-          'accent-content': '#000000',
-          neutral: '#2F1B05',
-          info: '#2563eb',
-          success: '#16a34a',
-          warning: '#d97706',
-          error: '#dc2626',
-          primary: '#ef8f4c',
-          'base-100': '#171717',
-          'base-200': '#252525',
-          'base-300': '#383838'
+          'primary': '#94b4c1',
+          'primary-focus': '#7fa5b5',
+          'primary-content': '#213448',
+          
+          'secondary': '#547792',
+          'secondary-focus': '#456a85',
+          'secondary-content': '#eae0cf',
+
+          'accent': '#eae0cf',
+          'accent-focus': '#dcd2bf',
+          'accent-content': '#213448',
+
+          'neutral': '#547792',
+          'neutral-focus': '#456a85',
+          'neutral-content': '#eae0cf',
+
+          'base-100': '#213448',
+          'base-200': '#2c4560', 
+          'base-300': '#375678',
+          'base-content': '#eae0cf',
+
+          'info': '#38bdf8',
+          'success': '#34d399',
+          'warning': '#fbbf24',
+          'error': '#f87171',
+
+          '--rounded-box': '1.5rem', 
+          '--rounded-btn': '0.8rem', 
+          '--rounded-badge': '2rem',
+          '--tab-radius': '0.8rem',
+        },
+        'picopad-light': {
+          'color-scheme': 'light',
+          'primary': '#547792', // Steel Blue
+          'primary-focus': '#456a85',
+          'primary-content': '#eae0cf',
+          
+          'secondary': '#94b4c1', // Light Blue
+          'secondary-focus': '#82a5b5',
+          'secondary-content': '#213448',
+
+          'accent': '#213448', // Dark Blue
+          'accent-focus': '#182635',
+          'accent-content': '#eae0cf',
+
+          'neutral': '#2c4560',
+          'neutral-focus': '#1e334a',
+          'neutral-content': '#eae0cf',
+
+          'base-100': '#eae0cf', // Beige
+          'base-200': '#dcd2bf', // Slightly darker beige
+          'base-300': '#cfc4b0', // Darker still
+          'base-content': '#213448',
+
+          'info': '#0ea5e9',
+          'success': '#10b981',
+          'warning': '#f59e0b',
+          'error': '#ef4444',
+
+          '--rounded-box': '1.5rem', 
+          '--rounded-btn': '0.8rem', 
+          '--rounded-badge': '2rem',
+          '--tab-radius': '0.8rem',
         }
       }
     ]

@@ -1,0 +1,104 @@
+﻿{
+  "status": "success",
+  "result": [
+    {
+      "projectId": "active-complex-385912",
+      "projectNumber": "140702008253",
+      "displayName": "My Project 41901",
+      "name": "projects/active-complex-385912",
+      "resources": {
+        "hostingSite": "active-complex-385912"
+      },
+      "state": "ACTIVE",
+      "etag": "1_80dd4c4a-8e7e-476a-bab7-a0e2a9f0b006"
+    },
+    {
+      "projectId": "aros-den-db",
+      "projectNumber": "818227819268",
+      "displayName": "aros-den-db",
+      "name": "projects/aros-den-db",
+      "resources": {
+        "hostingSite": "aros-den-db"
+      },
+      "state": "ACTIVE",
+      "etag": "1_de19ede0-ffdf-4320-9bd3-de3a2e055df3"
+    },
+    {
+      "projectId": "gymflow-dplhm",
+      "projectNumber": "1003822048165",
+      "displayName": "GymFlow",
+      "name": "projects/gymflow-dplhm",
+      "resources": {
+        "hostingSite": "gymflow-dplhm"
+      },
+      "state": "ACTIVE",
+      "etag": "1_a0877cc8-033f-4152-8b2d-952800e77a98"
+    },
+    {
+      "projectId": "picopad-610f1",
+      "projectNumber": "916606190632",
+      "displayName": "picopad",
+      "name": "projects/picopad-610f1",
+      "resources": {
+        "hostingSite": "picopad-610f1"
+      },
+      "state": "ACTIVE",
+      "etag": "1_e16b02f6-9d89-41f7-a230-91f4e943f753"
+    },
+    {
+      "projectId": "raspberry-assist-80425",
+      "projectNumber": "264656153257",
+      "displayName": "raspberry assist",
+      "name": "projects/raspberry-assist-80425",
+      "resources": {
+        "hostingSite": "raspberry-assist-80425"
+      },
+      "state": "ACTIVE",
+      "etag": "1_d0b34559-8a2a-4259-b730-3fe839b4e805"
+    },
+    {
+      "projectId": "raspi-assistant-2105",
+      "projectNumber": "655065445351",
+      "displayName": "raspi assistant",
+      "name": "projects/raspi-assistant-2105",
+      "resources": {
+        "hostingSite": "raspi-assistant-2105"
+      },
+      "state": "ACTIVE",
+      "etag": "1_b5a1c8ff-3131-4b6c-a252-afa2e341a585"
+    },
+    {
+      "projectId": "raspi-vicky-98927",
+      "projectNumber": "377943316039",
+      "displayName": "raspi vicky",
+      "name": "projects/raspi-vicky-98927",
+      "resources": {
+        "hostingSite": "raspi-vicky-98927"
+      },
+      "state": "ACTIVE",
+      "etag": "1_46748892-8da4-4766-84cc-2d434ae630bb"
+    },
+    {
+      "projectId": "vicky-73670",
+      "projectNumber": "1015457783682",
+      "displayName": "vicky",
+      "name": "projects/vicky-73670",
+      "resources": {
+        "hostingSite": "vicky-73670"
+      },
+      "state": "ACTIVE",
+      "etag": "1_b64f7968-8374-4de7-b23c-f85286f5405e"
+    },
+    {
+      "projectId": "vicky-portfolio-admin",
+      "projectNumber": "14870479951",
+      "displayName": "vicky-portfolio-admin",
+      "name": "projects/vicky-portfolio-admin",
+      "resources": {
+        "hostingSite": "vicky-portfolio-admin"
+      },
+      "state": "ACTIVE",
+      "etag": "1_db586f03-37ca-4416-bb3d-04093a57c35e"
+    }
+  ]
+}

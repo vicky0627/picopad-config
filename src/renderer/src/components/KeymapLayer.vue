@@ -49,6 +49,15 @@
               @click="keyboardStore.layers[index].color = '#f28c18'"
             ></div>
           </div>
+          <div class="divider my-1"></div>
+          <div class="flex flex-col gap-1">
+            <button class="btn btn-xs btn-ghost justify-start" @click="copyLayer">
+              <i class="mdi mdi-content-copy mr-2"></i>Copy Layer
+            </button>
+            <button class="btn btn-xs btn-ghost justify-start" @click="pasteLayer">
+              <i class="mdi mdi-content-paste mr-2"></i>Paste Layer
+            </button>
+          </div>
         </div>
       </template>
     </Popper>
@@ -60,6 +69,31 @@ import { keyboardStore, selectedLayer } from '../store'
 const props = defineProps(['layer', 'index'])
 if (!keyboardStore.layers[props.index])
   keyboardStore.layers[props.index] = { name: '', color: undefined }
+
+const copyLayer = () => {
+  const layerData = {
+    keymap: keyboardStore.keymap[props.index],
+    encoderKeymap: keyboardStore.encoderKeymap[props.index]
+  }
+  localStorage.setItem('pog-layer-clipboard', JSON.stringify(layerData))
+}
+
+const pasteLayer = () => {
+  const dataStr = localStorage.getItem('pog-layer-clipboard')
+  if (!dataStr) return
+  try {
+    const data = JSON.parse(dataStr)
+    if (data.keymap) {
+      keyboardStore.keymap[props.index] = [...data.keymap]
+    }
+    if (data.encoderKeymap && keyboardStore.encoderKeymap[props.index]) {
+      // Basic check for compatibility
+       keyboardStore.encoderKeymap[props.index] = JSON.parse(JSON.stringify(data.encoderKeymap))
+    }
+  } catch (e) {
+    console.error('Failed to paste layer', e)
+  }
+}
 </script>
 <style lang="scss" scoped>
 .tab {

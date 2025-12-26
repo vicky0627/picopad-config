@@ -10,7 +10,7 @@
       your keyboard name
     </p>
     <p>
-      With this done please select the drive so POG can start to flash the firmware, you will be
+      With this done please select the drive so Picopad can start to flash the firmware, you will be
       able to configure everything after the flashing is done
     </p>
     <button class="btn btn-primary" @click="flashFirmwareToDrive">Select Drive</button>

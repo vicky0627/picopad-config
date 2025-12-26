@@ -1,32 +1,43 @@
 <template>
-  <div class="flex flex-col p-4">
-    <div class="flex items-center justify-between px-12">
-      <div class="flex items-center gap-2">
+  <div class="flex flex-col px-6 py-4">
+    <div class="w-full flex flex-col gap-6">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <img src="@renderer/assets/icon.png" alt="" class="w-16 h-16 rounded-full shadow-lg border border-white/10" />
+          <div>
+            <h1 class="text-3xl font-bold tracking-tight">Easy Keyboard Configurator</h1>
+            <p class="text-base text-base-content/60">Effortlessly customize your keyboard with Picopad</p>
+          </div>
+        </div>
         <div class="flex items-center gap-2">
-          <img src="../assets/icon.png" alt="" class="w-16" />
-        </div>
-        <div>
-          <p class="text-2xl font-bold">Easy Keyboard Configurator</p>
-          <p class="text-sm">Effortlessly customize your keyboard with Pog</p>
+          <button class="btn btn-ghost btn-circle" @click="refreshConnectedBoards" title="Refresh Devices">
+            <i class="mdi mdi-refresh text-xl"></i>
+          </button>
+          <button class="btn btn-primary text-white shadow-lg shadow-primary/30 transition-all hover:scale-105 hover:shadow-primary/50" @click="goToAddKeyboard">
+            <i class="mdi mdi-plus mr-1 text-lg"></i><span class="text-xs font-bold uppercase tracking-wide">add keyboard</span>
+          </button>
         </div>
       </div>
-      <div class="my-4 flex flex-col items-center justify-center gap-2">
-        <button class="btn btn-primary" @click="goToAddKeyboard">
-          <i class="mdi mdi-plus mr-1 text-lg"></i><span class="text-xs">add keyboard</span>
-        </button>
+      
+      <div v-if="sortedKeyboards.length !== 0" class="h-px w-full bg-base-content/10"></div>
+    </div>
+    <!-- Skeleton Loader (simulated when no keyboards) -->
+    <div v-if="keyboards.length === 0" class="keyboard-list opacity-50">
+      <div class="flex gap-4 rounded border border-white/5 p-4 animate-pulse">
+        <div class="h-[130px] w-[350px] rounded bg-white/5"></div>
+        <div class="flex flex-grow flex-col gap-2 py-2">
+          <div class="h-6 w-3/4 rounded bg-white/5"></div>
+          <div class="h-4 w-1/2 rounded bg-white/5"></div>
+          <div class="h-4 w-1/4 rounded bg-white/5"></div>
+        </div>
       </div>
     </div>
-    <div v-if="sortedKeyboards.length !== 0" class="divider"></div>
-    <div class="absolute right-2 top-40 flex justify-end">
-      <button class="btn btn-sm" @click="refreshConnectedBoards">
-        <i class="mdi mdi-refresh"></i>
-      </button>
-    </div>
+    
     <TransitionGroup name="list" tag="ul" class="keyboard-list">
       <div
         v-for="keyboard in sortedKeyboards"
         :key="keyboard.id"
-        class="keyboard-preview"
+        class="keyboard-preview animate-enter delay-200"
         :class="{
           'opacity-50': keyboard.path && !keyboard.driveConnected
         }"
@@ -60,10 +71,7 @@
             >
               Serial available
             </span>
-            <span v-if="keyboard.driveConnected" class="rounded bg-accent p-1 text-xs"
-              >USB Drive Mounted</span
-            >
-            <span v-else class="rounded bg-error p-1 text-xs">USB Drive Disconnected</span>
+            <!-- USB status removed as requested -->
           </p>
           <p v-else><span class="rounded bg-error p-1 text-xs">Read Only Serial</span></p>
           <button
@@ -112,7 +120,7 @@ const sortedKeyboards = computed(() => {
   })
 })
 
-const selectKeyboard = async (keyboard) => {
+const selectKeyboard = async (keyboard: any) => {
   const isSerial = serialKeyboards.value.find(
     ({ id, driveMounted }) => id === keyboard.id && !driveMounted
   )
@@ -134,7 +142,7 @@ const selectKeyboard = async (keyboard) => {
   }
 }
 
-const removeFromHistory = (keyboard) => {
+const removeFromHistory = (keyboard: any) => {
   keyboardHistory.value = keyboardHistory.value.filter((board) => board.id !== keyboard.id)
   keyboards.value = keyboards.value.filter((board) => board.id !== keyboard.id)
 }
@@ -205,22 +213,22 @@ onMounted(() => {
 })
 </script>
 
-<style lang="scss" scoped>
+<style lang="postcss" scoped>
 .keyboard-list {
-  @apply mx-auto mt-2 gap-2 pb-2;
-  max-width: 700px;
+  @apply mt-4 gap-4 pb-4 w-full;
 }
 .keyboard-preview {
-  @apply flex cursor-pointer gap-4 rounded border border-white border-opacity-0 p-4 transition-all;
-  &:hover {
-    @apply border-opacity-40 bg-base-200;
-  }
-  .image {
-    @apply flex flex-shrink-0 items-center justify-center rounded;
-    width: 350px;
-    height: 130px;
-    border: 1px solid #333;
-  }
+  @apply flex cursor-pointer gap-6 rounded-xl border border-white/5 bg-base-100/50 p-6 transition-all;
+}
+.keyboard-preview:hover {
+  @apply border-primary/40 bg-base-200/80 shadow-2xl shadow-primary/10;
+  transform: translateY(-2px);
+}
+.keyboard-preview .image {
+  @apply flex flex-shrink-0 items-center justify-center rounded;
+  width: 350px;
+  height: 130px;
+  border: 1px solid #333;
 }
 .list-enter-active,
 .list-leave-active {

@@ -72,7 +72,7 @@ const addEncoder = () => {
   // cleanEncoders();
 
   keyboardStore.encoderKeymap.forEach((layer) => {
-    layer.push(['KC.TRNS', 'KC.TRNS'])
+    layer.push(['KC.TRNS', 'KC.TRNS', 'KC.TRNS'])
   })
   keyboardStore.encoders.push(encoder)
 }

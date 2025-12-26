@@ -5,12 +5,12 @@
         <button class="btn btn-primary" @click="router.back()">Back</button>
       </div>
 
-      <!-- Recent Keyboards -->
-      <div v-if="recentKeyboards.length > 0" class="mb-12">
-        <h2 class="text-2xl font-semibold mb-4">Recent Keyboards</h2>
+      <!-- Detected Keyboards -->
+      <div v-if="detectedKeyboards.length > 0" class="mb-12">
+        <h2 class="text-2xl font-semibold mb-4">Detected Keyboards</h2>
         <div class="grid gap-4">
           <div
-            v-for="keyboard in recentKeyboards"
+            v-for="keyboard in detectedKeyboards"
             :key="keyboard.id"
             class="bg-base-100 p-4 rounded-lg flex items-center justify-between cursor-pointer hover:bg-base-300"
             @click="selectKeyboard(keyboard)"
@@ -40,7 +40,7 @@
             @click="addExistingKeyboard"
           >
             <i class="mdi mdi-file-import mr-2"></i>
-            Add existing POG keyboard
+            Add existing Picopad keyboard
           </button>
         </div>
       </div>
@@ -61,14 +61,14 @@ interface Keyboard {
 }
 
 const router = useRouter()
-const recentKeyboards = ref<Keyboard[]>([])
+const detectedKeyboards = ref<Keyboard[]>([])
 
-async function loadRecentKeyboards() {
+async function loadDetectedKeyboards() {
   try {
-    // const keyboards = await window.api.listKeyboards()
-    // recentKeyboards.value = keyboards
+    const keyboards = await window.api.listKeyboards()
+    detectedKeyboards.value = keyboards
   } catch (error) {
-    console.error('Failed to load recent keyboards:', error)
+    console.error('Failed to load detected keyboards:', error)
   }
 }
 
@@ -80,6 +80,7 @@ async function setupNewKeyboard() {
 async function addExistingKeyboard() {
   const keyboard = await window.api.selectDrive()
   console.log(keyboard)
+  if(!keyboard) return
   keyboardStore.import(keyboard)
   console.log(keyboardStore)
   if (keyboardStore.pogConfigured) {
@@ -92,14 +93,27 @@ async function addExistingKeyboard() {
 }
 
 function selectKeyboard(keyboard: Keyboard) {
-  // Load keyboard configuration
-  Object.assign(keyboardStore, keyboard)
-  // Navigate to configurator
-  router.push('/configurator/keymap')
+  selectKeyboardByPath(keyboard.path)
+}
+
+async function selectKeyboardByPath(path: string) {
+    // We reuse the logic from addExistingKeyboard but with a known path
+    const keyboard = await window.api.selectKeyboard({ path })
+    if (!keyboard || keyboard.error) {
+        console.error('Failed to load keyboard', keyboard)
+        return
+    }
+    keyboardStore.import(keyboard)
+    if (keyboardStore.pogConfigured) {
+      router.push('/configurator/keymap')
+      addToHistory(keyboardStore)
+    } else {
+      router.push('/setup-wizard')
+    }
 }
 
 onMounted(() => {
   console.log('KeyboardSelector onMounted')
-  loadRecentKeyboards()
+  loadDetectedKeyboards()
 })
-</script> 
+</script>

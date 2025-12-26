@@ -5,3 +5,15 @@ out
 .idea
 .DS_Store
 .pog.code-workspace
+
+# Build artifacts
+dist-web
+build/
+*.exe
+*.zip
+
+# Firebase and Secrets
+.firebase/
+.firebaserc
+firebase.json
+src/renderer/src/firebase.ts

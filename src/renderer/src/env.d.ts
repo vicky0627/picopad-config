@@ -6,3 +6,7 @@ declare module '*.vue' {
   const component: DefineComponent<{}, {}, any>
   export default component
 }
+
+declare module 'chroma-js';
+declare module '@wlard/vue3-popper';
+declare module '@wlard/vue-class-store';

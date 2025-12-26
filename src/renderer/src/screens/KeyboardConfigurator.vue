@@ -1,14 +1,12 @@
 <template>
   <div class="flex h-screen">
     <ul
-      class="menu flex-shrink-0 bg-base-100"
+      class="menu flex-shrink-0 bg-base-200/95 backdrop-blur-md border-r border-base-content/10 z-20 text-base-content"
       :class="{
         'menu-open': menuOpen
       }"
     >
-      <li class="flex items-center p-4 text-xl font-bold" @click="iconClick">
-        <img src="@renderer/assets/icon.png" alt="" class="h-24 rounded" />
-      </li>
+
       <li class="flex items-center p-4 pt-0">
         <span
           class="w-full cursor-pointer rounded bg-base-300 text-center text-xs"
@@ -18,80 +16,46 @@
           {{ keyboardStore.name }}</span
         >
       </li>
-      <li>
-        <router-link to="/configurator/keymap"
-          ><i class="mdi mdi-alphabetical-variant"></i>Keymap</router-link
-        >
-      </li>
-      <li>
-        <router-link to="/configurator/layout-editor"
-          ><i class="mdi mdi-keyboard-variant"></i>Keyboard Layout</router-link
-        >
-      </li>
-      <li>
-        <router-link to="/configurator/encoder"
-          ><i class="mdi mdi-axis-z-rotate-clockwise"></i>Encoder</router-link
-        >
-      </li>
-      <li>
-        <router-link to="/configurator/rgb"><i class="mdi mdi-led-on"></i>RGB</router-link>
-      </li>
-      <hr class="border-white border-opacity-20" />
-      <li>
-        <router-link to="/configurator/info"
-          ><i class="mdi mdi-information-outline"></i>Info</router-link
-        >
-      </li>
-      <li>
-        <router-link to="/configurator/matrix"><i class="mdi mdi-grid"></i>Matrix</router-link>
-      </li>
-      <li>
-        <router-link to="/configurator/pins"
-          ><i class="mdi mdi-electric-switch"></i>Pins</router-link
-        >
-      </li>
-      <li>
-        <router-link to="/configurator/coordmap"
-          ><i class="mdi mdi-sort-numeric-ascending"></i>CoordMap</router-link
-        >
-      </li>
-      <li>
-        <router-link to="/configurator/raw-keymap"
-          ><i class="mdi mdi-code-brackets"></i>Raw Keymap</router-link
-        >
-      </li>
-      <li>
-        <router-link to="/configurator/firmware"><i class="mdi mdi-flash"></i>Firmware</router-link>
-      </li>
+      <template v-for="(item, index) in menuItems" :key="index">
+        <hr v-if="item.separator" class="border-base-content border-opacity-20 my-1" />
+        <li v-else>
+          <router-link
+            :to="item.to"
+            active-class="!opacity-100 !text-primary font-bold bg-base-300"
+            class="opacity-70 transition-all hover:opacity-100 focus:text-primary focus:bg-transparent flex items-center gap-3 py-2"
+          >
+            <i class="mdi text-lg" :class="item.icon"></i>
+            {{ item.label }}
+          </router-link>
+        </li>
+      </template>
     </ul>
     <div class="flex h-full w-full flex-col overflow-y-auto">
-      <div class="z-10 flex items-center justify-between bg-base-100 py-4 shadow-xl">
+      <div class="z-10 flex h-20 flex-shrink-0 items-center justify-between border-b border-base-content/10 bg-base-200/95 px-6 py-4 shadow-sm backdrop-blur-md">
         <h1
           id="navTitle"
-          class="flex-grow overflow-auto text-center text-4xl font-bold"
+          class="flex-grow overflow-hidden text-center text-3xl font-bold leading-[3rem]"
           contenteditable="true"
           spellcheck="false"
-          style="line-height: 48px; max-height: 100px"
         >
           {{ currentRouteName }}
         </h1>
-        <div class="btn btn-ghost mr-4" @click="info">
-          <i class="mdi mdi-help-circle-outline text-2xl"></i>
+        <ProfileSelector class="mr-6" />
+
+        <div class="mr-4 btn btn-primary btn-sm h-10 min-h-0" @click="saveKeymap" title="Save Keymap">
+          <i class="mdi mdi-content-save text-xl"></i>
         </div>
-        <div class="btn btn-primary mr-4" @click="saveKeymap">
-          <i class="mdi mdi-content-save text-2xl"></i>
-        </div>
-        <div class="btn mr-4" :class="{ 'btn-primary': showDebug }" @click="toggleDebug">
-          <i class="mdi mdi-bug text-2xl"></i>
+        <div class="btn btn-sm h-10 min-h-0" :class="{ 'btn-primary': showDebug }" @click="toggleDebug" title="Debug">
+          <i class="mdi mdi-bug text-xl"></i>
         </div>
       </div>
-      <div class="flex flex-grow overflow-hidden bg-base-200">
-        <div class="flex-grow overflow-y-auto px-4 pt-4">
+      <div class="relative flex flex-grow animate-enter overflow-hidden bg-transparent delay-100">
+        <div class="z-10 flex-grow overflow-y-auto p-10">
           <router-view></router-view>
         </div>
         <div
           v-show="showDebug"
-          class="w-[600px] flex-shrink-0 overflow-y-auto border-l border-base-300 bg-base-100 p-4"
+          class="w-[600px] flex-shrink-0 overflow-y-auto border-l border-base-content/10 bg-base-100 p-6"
         >
           <Debug />
         </div>
@@ -104,12 +68,28 @@
 import { addToHistory, keyboardStore } from '../store'
 import { useRoute, useRouter } from 'vue-router'
 import { computed, onMounted, ref } from 'vue'
+import ProfileSelector from '../components/ProfileSelector.vue'
 import Debug from '../components/debug.vue'
 import { saveConfigurationWithLoading } from '../helpers/saveConfigurationWrapper'
 
 const router = useRouter()
 const route = useRoute()
 const showDebug = ref(false)
+
+const menuItems = [
+  { to: '/configurator/keymap', label: 'Keymap', icon: 'mdi-alphabetical-variant' },
+  { to: '/configurator/layout-editor', label: 'Keyboard Layout', icon: 'mdi-keyboard-variant' },
+  { to: '/configurator/encoder', label: 'Encoder', icon: 'mdi-axis-z-rotate-clockwise' },
+  { to: '/configurator/rgb', label: 'RGB', icon: 'mdi-led-on' },
+  { separator: true, to: '', label: '', icon: '' },
+  { to: '/configurator/manual', label: 'User Manual', icon: 'mdi-book-open-variant' },
+  { to: '/configurator/info', label: 'Info', icon: 'mdi-information-outline' },
+  { to: '/configurator/matrix', label: 'Matrix', icon: 'mdi-grid' },
+  { to: '/configurator/pins', label: 'Pins', icon: 'mdi-electric-switch' },
+  { to: '/configurator/coordmap', label: 'CoordMap', icon: 'mdi-sort-numeric-ascending' },
+  { to: '/configurator/raw-keymap', label: 'Raw Keymap', icon: 'mdi-code-brackets' },
+  { to: '/configurator/firmware', label: 'Firmware', icon: 'mdi-flash' }
+]
 
 // nav guard
 console.log('path is', keyboardStore.path)
@@ -144,10 +124,7 @@ const currentRouteName = computed(() => route.matched[1]?.name)
 
 const menuOpen = ref(true)
 
-const iconClick = () => {
-  // menuOpen.value = !menuOpen.value
-  reselectKeyboard()
-}
+
 
 onMounted(() => {
   const title = document.getElementById('navTitle')
@@ -161,16 +138,10 @@ onMounted(() => {
   })
 })
 
-const info = () => {
-  // TODO: open a browser window with the help docs for this route
-  window.api.openExternal('https://pog.heaper.de/docs/intro')
-}
+
 </script>
 
 <style lang="scss" scoped>
-.router-link-active {
-  @apply font-bold text-primary;
-}
 .menu {
   width: 80px;
   overflow: hidden;
@@ -178,16 +149,6 @@ const info = () => {
   flex-wrap: nowrap;
   * {
     white-space: nowrap;
-  }
-  li a {
-    opacity: 0.5;
-    &.router-link-active {
-      opacity: 1;
-    }
-    &:focus {
-      background: transparent;
-      @apply text-primary;
-    }
   }
 }
 .menu-open {

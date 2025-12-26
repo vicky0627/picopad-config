@@ -2,14 +2,14 @@ import { app, shell, BrowserWindow, ipcMain, Menu } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import drivelist from 'drivelist'
+import serialPort, { ReadlineParser, SerialPort } from './mocks'
 import { flashFirmware } from './kmkUpdater'
 // import './saveConfig'
-import { checkForUSBKeyboards, handleSelectDrive, selectKeyboard } from './selectKeyboard'
+// import './saveConfig'
+import { checkForUSBKeyboards, handleSelectDrive, selectKeyboard, listKeyboards } from './selectKeyboard'
 import { updateFirmware } from './kmkUpdater'
 import './keyboardDetector' // Import keyboard detector
-import serialPort from 'serialport'
-import { ReadlineParser } from '@serialport/parser-readline'
+import { scanDrives } from './driveScanner'
 import fs from 'fs'
 import { currentKeyboard } from './store'
 import { saveConfiguration } from './saveConfig'
@@ -23,27 +23,27 @@ const template: unknown = [
   // { role: 'appMenu' }
   ...(isMac
     ? [
-        {
-          label: app.name,
-          submenu: [
-            { role: 'about' },
-            // {
-            //   label: 'Check for Updates...',
-            //   click: () => {
-            //     autoUpdater.checkForUpdates()
-            //   }
-            // },
-            { type: 'separator' },
-            { role: 'services' },
-            { type: 'separator' },
-            { role: 'hide' },
-            { role: 'hideOthers' },
-            { role: 'unhide' },
-            { type: 'separator' },
-            { role: 'quit' }
-          ]
-        }
-      ]
+      {
+        label: app.name,
+        submenu: [
+          { role: 'about' },
+          // {
+          //   label: 'Check for Updates...',
+          //   click: () => {
+          //     autoUpdater.checkForUpdates()
+          //   }
+          // },
+          { type: 'separator' },
+          { role: 'services' },
+          { type: 'separator' },
+          { role: 'hide' },
+          { role: 'hideOthers' },
+          { role: 'unhide' },
+          { type: 'separator' },
+          { role: 'quit' }
+        ]
+      }
+    ]
     : []),
   // { role: 'fileMenu' }
   {
@@ -62,15 +62,15 @@ const template: unknown = [
       { role: 'paste' },
       ...(isMac
         ? [
-            { role: 'pasteAndMatchStyle' },
-            { role: 'delete' },
-            { role: 'selectAll' },
-            { type: 'separator' },
-            {
-              label: 'Speech',
-              submenu: [{ role: 'startSpeaking' }, { role: 'stopSpeaking' }]
-            }
-          ]
+          { role: 'pasteAndMatchStyle' },
+          { role: 'delete' },
+          { role: 'selectAll' },
+          { type: 'separator' },
+          {
+            label: 'Speech',
+            submenu: [{ role: 'startSpeaking' }, { role: 'stopSpeaking' }]
+          }
+        ]
         : [{ role: 'delete' }, { type: 'separator' }, { role: 'selectAll' }])
     ]
   },
@@ -125,7 +125,7 @@ const createWindow = async () => {
     show: false,
     autoHideMenuBar: true,
     backgroundColor: '#000000',
-    ...(process.platform === 'linux' ? { icon } : {}),
+    icon,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
@@ -241,7 +241,7 @@ const chunksize = 1200
 const getBoardInfo = (port) => {
   return new Promise((res, rej) => {
     // connect to port and get the response just once
-    const sport = new serialPort.SerialPort({ path: port.path, baudRate, autoOpen: true }, (e) => {
+    const sport = new SerialPort({ path: port.path, baudRate, autoOpen: true }, (e) => {
       // if the connection fails reject the promise
       if (e) return rej(e)
     })
@@ -342,7 +342,7 @@ export let connectedKeyboardPort: any = null
 export const connectSerialKeyboard = async (keyboard) => {
   connectedKeyboardPort = new serialPort.SerialPort(
     { path: keyboard.path, baudRate, autoOpen: true },
-    (e) => {}
+    (e) => { }
   )
   const parser = connectedKeyboardPort.pipe(new ReadlineParser({ delimiter: '\n' }))
   // parser.once('data', (data) => {
@@ -618,20 +618,9 @@ const openExternal = (url) => {
 // Drive and Firmware handlers
 ipcMain.handle('list-drives', async () => {
   try {
-    const drives = await drivelist.list()
-    const filteredDrives = drives
-      .map((drive) => ({
-        path: drive.mountpoints[0]?.path || '',
-        name: drive.mountpoints[0]?.label || drive.description || 'Unknown Drive',
-        isReadOnly: drive.isReadOnly,
-        isRemovable: drive.isRemovable,
-        isSystem: drive.isSystem,
-        isUSB: drive.isUSB,
-        isCard: drive.isCard
-      }))
-      .filter((drive) => drive.path !== '' && drive.isUSB)
-    console.log('drives', filteredDrives)
-    return filteredDrives
+    const drives = await scanDrives()
+    console.log('drives', drives)
+    return drives
   } catch (error) {
     console.error('Failed to list drives:', error)
     throw error
@@ -666,15 +655,15 @@ ipcMain.handle(
   }
 )
 
-// // Keyboard History handlers
-// ipcMain.handle('list-keyboards', () => {
-//   try {
-//     return listKeyboards()
-//   } catch (error) {
-//     console.error('Failed to list keyboards:', error)
-//     throw error
-//   }
-// })
+// Keyboard History handlers
+ipcMain.handle('list-keyboards', async () => {
+  try {
+    return await listKeyboards()
+  } catch (error) {
+    console.error('Failed to list keyboards:', error)
+    throw error
+  }
+})
 
 // Serial Port handlers
 ipcMain.handle('serial-ports', async () => {

@@ -1,5 +1,5 @@
-appId: de.heaper.pog
-productName: pog
+appId: com.picopad.config
+productName: Picopad
 directories:
   buildResources: build
 files:
@@ -10,9 +10,8 @@ files:
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
 asarUnpack:
   - resources/*
-afterSign: build/notarize.js
 win:
-  executableName: pog
+  executableName: Picopad-v1
   target:
     - target: portable
       arch:
@@ -21,7 +20,7 @@ win:
       arch:
         - x64
 nsis:
-  artifactName: ${name}-${version}-${arch}-setup.${ext}
+  artifactName: Picopad-v1-Setup.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
@@ -32,8 +31,6 @@ mac:
     - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
     - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
-#  publish:
-#    - generic
   target:
     - target: dmg
       arch:
@@ -50,8 +47,6 @@ linux:
     - target: AppImage
       arch:
         - x64
-#    - snap
-#    - deb
   maintainer: Jan Lunge
   category: Utility
 appImage:
@@ -59,7 +54,6 @@ appImage:
 npmRebuild: false
 publish:
   provider: github
-  repo: pog
-  owner: janlunge
+  repo: picopad-config
+  owner: vicky0627
   releaseType: draft
-#  url: https://pog.heaper.de/auto-updates

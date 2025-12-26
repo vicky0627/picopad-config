@@ -11,7 +11,7 @@
         <label class="font-bold text-sm text-base-content/70 uppercase tracking-wider">Application</label>
         <div class="flex items-center justify-between p-3 bg-base-200 rounded-lg border border-base-content/10">
           <div class="flex items-center gap-3">
-            <img src="@renderer/assets/icon.png" class="w-10 h-10 rounded-full" />
+            <img src="@renderer/assets/icon.png" class="w-10 h-10 rounded-full border border-primary/20" />
             <div>
               <p class="font-bold">Picopad Configuration Suite</p>
               <p class="text-xs text-base-content/60">Version 1.0.0</p>
